@@ -3,11 +3,25 @@ from collections import defaultdict
 from glob import glob
 from pathlib import Path
 import pickle
+import hashlib
+import json
+import os
+from pathlib import Path
+
+
+unique_records = set()
+
+def dict_to_hash_string(data: dict)-> str:
+    data_str = json.dumps(data, sort_keys=True)  # Convert dict to string
+    data_bytes = data_str.encode()  # Convert string to bytes
+
+    hash_object = hashlib.sha256(data_bytes)
+    hex_dig = hash_object.hexdigest()
+    return hex_dig
 
 def extract_metryki_wolyn_events(path_to_html):
     print(f'Processing {path_to_html}')
     event_dicts = defaultdict(list)
-    
     try:
         with open(path_to_html, 'rb') as raw_page:
 
@@ -31,10 +45,11 @@ def extract_metryki_wolyn_events(path_to_html):
                     event_dict = dict(zip(row_headings, [a.text for a in row.find_all('td')]))
                     
                     if event_dict:
+                        dict_hash = dict_to_hash_string(event_dict)
+                        unique_records.add(dict_hash)
                         event_dicts[event_type].append(event_dict)
             
         print(f"Success! File {path_to_html} parsed successfully")
-        print(f"Total records: {sum(len(records) for records in event_dicts.values())}")
         return event_dicts
     
     except UnicodeDecodeError as ee:
@@ -59,6 +74,16 @@ def extract_all_data_across_directory(path_to_dir):
     except Exception as ee:
         raise ValueError("Nothing was processed!", ee)
 
-all_records = extract_all_data_across_directory(Path(r"..\data"))
-with open('records.pickle', 'wb') as f:
-    pickle.dump(all_records, f)
+def main():
+    script_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+    data_dir = script_dir / ".." / "data"
+    all_records = extract_all_data_across_directory(data_dir.resolve())
+    #all_records = extract_all_data_across_directory(Path(r"..\data"))
+    with open('records.pickle', 'wb') as f:
+        pickle.dump(all_records, f)
+
+
+if __name__ == "__main__":
+    print('Extracting all records from directory')
+    main()
+    print(f"Total records Extracted: {len(list(unique_records))}")

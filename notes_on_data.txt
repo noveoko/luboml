@@ -1,0 +1,17 @@
+Based on the dataset provided, if you're trying to extract "People" from it, there are several potential edge cases and challenges to consider:
+
+Missing or inconsistent data: There might be missing values or inconsistent data in the fields "Imię" (Name) and "Nazwisko" (Surname). Also, it's possible that some records might have more than one person associated with them (like in the column "O zmarłym i rodzinie" (About the deceased and family)).
+
+Multi-word names: Names can consist of more than one word, for example, "Ludwik Henryk" in the "Imię" column. Similarly, last names could also contain more than one word.
+
+Special characters: Names could contain special characters, accents, or non-English alphabets. For example, characters like "ł", "ó", "ę", etc.
+
+Different name formats: In the "O zmarłym i rodzinie" column, the names could be in a different format (e.g., "Janie Kaczorowskim" instead of "Jan Kaczorowski").
+
+Handling of titles or statuses: The dataset could include titles or statuses like "panna" (miss), "wdowa" (widow), "żona" (wife), "mąż" (husband) etc. in the "O zmarłym i rodzinie" field. If you're not careful, you might accidentally treat these as names.
+
+Age in different formats: Age column "Lat" has age in years, but also in fractions of a year (like "3/12" meaning 3 months).
+
+Differentiating between first name and last name: This dataset seems to be in Polish, and the order of first and last name might be different than in English datasets. We need to ensure that the extraction correctly identifies the first and last names.
+
+Differentiating between people and places: Some names could also be names of places (e.g., "Radziwiłłów"). We need to ensure that these aren't mistakenly identified as people.
