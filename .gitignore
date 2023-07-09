@@ -162,3 +162,5 @@ cython_debug/
 #DATA
 raw_pages/
 data/
+
+records.pickle
