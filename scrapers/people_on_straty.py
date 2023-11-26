@@ -1,9 +1,14 @@
 from bs4 import BeautifulSoup as bs
 
 raw_page = None
-with open('/content/<straty_people_result.html>') as page:
+with open('/content/straty_antoni_stefania.html') as page:
   raw_page = page.read()
   
+from bs4 import BeautifulSoup
+
+# Sample HTML content
+html_content = raw_page
+
 # Parse the HTML content
 soup = BeautifulSoup(html_content, 'html.parser')
 
@@ -23,6 +28,11 @@ for input_lp in soup.find_all('input', class_='tekst_szukaj_wynik_lp'):
 
         persons_data.append(person_data)
 
-# Print extracted data
-for person in persons_data:
-    print(person)
+import csv
+
+with open('people_with_mother_stefania_father_antoni.csv', 'w') as outfile:
+  writer = csv.DictWriter(outfile, fieldnames=persons_data[0].keys())
+  writer.writeheader()
+  # Print extracted data
+  for person in persons_data:
+      writer.writerow(person)
