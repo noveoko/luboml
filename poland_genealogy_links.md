@@ -10,6 +10,7 @@
 * [Archival Indexing System](https://www.basia.famula.pl/en/)
 * [Lublin Region Person Search](https://regestry.lubgens.eu/)
 * [Augustow Region Person Search](https://search.jzi.org.pl/geneo/)
+* [Archive Index Search Engine](https://metryki.genbaza.pl/)
 
 ## Digital Archives
 
