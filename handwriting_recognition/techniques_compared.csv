@@ -1,0 +1,9 @@
+Tool,Out-of-the-box Accuracy,Trainability,Interface Quality,Cost,Export Functionality
+Transkribus,Low,High,Good (slightly buggy),Free tier available,Excellent
+Google Document AI,High,Low,Complex,Paid (after trial),Poor
+Nanonets,Moderate,Low,Nice,Not specified,Not specified
+Google Keep,Low,None,Simple,Free,Not specified
+Google Docs,Low,None,Simple,Free,Good
+Nebo,Not specified,None,Not suitable for file upload,Not specified,Not specified
+Google Cloud Vision API,Low,None,Complex,Paid,Not specified
+Microsoft Azure Cognitive Services,High,None,Complex,Paid,Not specified
