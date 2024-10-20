@@ -1,0 +1,21 @@
+Otsu's Algorithm (1979) - A global thresholding technique that determines an optimal threshold value by analyzing the grayscale properties of an image.
+Niblack's Algorithm (1986) - A local binarization method that calculates the mean and standard deviation within a small neighboring domain of each pixel for threshold adjustment.
+Sauvola's Algorithm (1997) - An improvement upon Niblack's algorithm that introduces a new parameter to address excessive noise levels.
+NICK Algorithm (2009) - A modification of Niblack's algorithm that improves binarization of light-colored page region images by reducing the binary threshold.
+Wolf's Algorithm (2003) - A binarization technique that combines global and local thresholding methods.
+Gatos' Algorithm (2006) - An adaptive degraded document image binarization technique that combines local and global thresholding methods.
+Bernsen's Algorithm (1986) - A local thresholding technique that calculates the threshold as the average of the minimum and maximum gray values in a local window.
+Su's Algorithm (2010) - A binarization technique that combines local and global thresholding methods and uses a rough estimation of the background to construct an image with high contrast.
+Badekas' Algorithm (2007) - A self-organizing map neural network-based binarization technique that combines multiple binarization methods.
+DeepOtsu (2019) - A deep learning-based binarization model that combines the Otsu algorithm with a convolutional neural network (CNN) for automatic feature extraction.
+DSN (2018) - A deep supervised network-based binarization method that uses a layered architecture to learn how to predict text pixels at different feature levels.
+FCN (2015) - A fully convolutional network-based binarization method that performs pixel-level classification and generates a label for each pixel.
+PD-Net (2018) - A binarization method that combines FCN and a primal-dual network for document image binarization.
+Two-Stage GAN (2020) - A generative adversarial network-based binarization method that uses a two-stage approach for document image binarization with color noise and background removal.
+TANet (2019) - A texture augmentation network that introduces adversarial learning to transfer texture elements from degraded reference document images into a clean binarized image.
+UDBNet (2020) - An unsupervised document binarization network that combines TANet and an unsupervised document binarization network (UDBNet) for improved performance on actual degraded images.
+DE-GAN (2020) - A document enhancement generative adversarial network that uses conditional GANs (cGANs) to restore severely degraded document images.
+DD-GAN (2020) - A dual discriminator generative adversarial network that uses a network of two discriminators to capture information for document image binarization.
+MsMa-Net (2021) - A multi-scale multi-attention network for moiré document image binarization.
+DocEnTr (2022) - A document enhancement transformer that uses a vision transformer model for document image binarization.
+DP-LinkNet (2021) - A convolutional encoder-decoder model for document image binarization that introduces a hybrid dilated convolution (HDC) module and spatial pyramid pooling (SPP).
