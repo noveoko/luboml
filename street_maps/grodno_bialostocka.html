@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Białostocka Street — Virtual Map, Grodno</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment:    #f0e6c8;
+    --parchment-dk: #e0d0a8;
+    --ink:          #2a1a08;
+    --ink-mid:      #5a3e20;
+    --ink-light:    #9a7a50;
+    --road-color:   #6a6050;
+    --road-stripe:  #fff8e0;
+    --cat-trade:    #6a9e5a;
+    --cat-pharmacy: #4a7aaa;
+    --cat-industrial:#c45820;
+    --cat-textile:  #8a5aaa;
+    --cat-food:     #c48020;
+    --cat-factory:  #7a5530;
+    --unknown-bg:   #f8f2e0;
+    --unknown-bd:   #c0b090;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: #d4c090;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,0,0,0.03) 40px, rgba(0,0,0,0.03) 41px),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(0,0,0,0.03) 40px, rgba(0,0,0,0.03) 41px);
+    font-family: 'IM Fell English', Georgia, serif;
+    color: var(--ink);
+    padding: 30px 20px 40px;
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─────────────────────────────────────── */
+  .header {
+    max-width: 900px;
+    margin: 0 auto 28px;
+    text-align: center;
+  }
+  .header-ornament {
+    font-size: 1.4em;
+    color: var(--ink-mid);
+    letter-spacing: 6px;
+    margin-bottom: 4px;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4em;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.15;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+  .header h1 span {
+    font-style: italic;
+    font-weight: 400;
+  }
+  .header .subtitle {
+    font-style: italic;
+    color: var(--ink-mid);
+    font-size: 1em;
+    margin-bottom: 14px;
+  }
+  .header .template-badge {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--parchment);
+    font-family: 'Courier New', monospace;
+    font-size: 0.85em;
+    padding: 4px 14px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+  }
+  .divider {
+    border: none;
+    border-top: 1px solid var(--ink-light);
+    margin: 14px 0;
+    opacity: 0.5;
+  }
+
+  /* ─── LEGEND ─────────────────────────────────────── */
+  .legend-panel {
+    max-width: 900px;
+    margin: 0 auto 22px;
+    background: var(--parchment);
+    border: 1px solid var(--ink-light);
+    border-radius: 4px;
+    padding: 10px 16px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+  }
+  .legend-title {
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--ink-mid);
+    margin-bottom: 8px;
+    font-family: 'Playfair Display', serif;
+  }
+  .legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78em;
+    color: var(--ink-mid);
+  }
+  .legend-swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ─── STREET WRAPPER ──────────────────────────────── */
+  .map-frame {
+    max-width: 100%;
+    background: var(--parchment);
+    border: 2px solid var(--ink-light);
+    border-radius: 4px;
+    padding: 20px 16px;
+    box-shadow: 3px 3px 14px rgba(0,0,0,0.2), inset 0 0 40px rgba(0,0,0,0.04);
+    margin: 0 auto 24px;
+    overflow: hidden;
+  }
+  .compass-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.72em;
+    color: var(--ink-light);
+    font-style: italic;
+    padding: 0 4px;
+  }
+  .street-scroll {
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+  .street-diagram {
+    display: inline-flex;
+    flex-direction: column;
+    min-width: max-content;
+    padding: 0 12px;
+  }
+
+  /* ─── BUILDING ROWS ───────────────────────────────── */
+  .building-row {
+    display: flex;
+    flex-direction: row;
+    gap: 3px;
+    align-items: flex-end;  /* buildings hang down to the road */
+  }
+  .building-row.south-side {
+    align-items: flex-start; /* buildings grow down from road */
+    margin-top: 0;
+  }
+
+  .building {
+    width: 44px;
+    min-height: 44px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 4px;
+    border-radius: 3px 3px 0 0;
+    font-size: 0.62em;
+    text-align: center;
+    cursor: default;
+    position: relative;
+    transition: filter 0.15s, transform 0.15s;
+    border: 1.5px solid var(--unknown-bd);
+    background: var(--unknown-bg);
+    border-bottom: none;
+  }
+  .building.south-side {
+    border-radius: 0 0 3px 3px;
+    justify-content: flex-start;
+    padding-bottom: 0;
+    padding-top: 4px;
+    border-top: none;
+    border-bottom: 1.5px solid var(--unknown-bd);
+  }
+  .building.unknown {
+    border-style: dashed;
+    opacity: 0.75;
+  }
+  .building.known {
+    min-height: 72px;
+    border-style: solid;
+    border-width: 2px;
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+    opacity: 1;
+  }
+  .building.known.south-side {
+    min-height: 72px;
+  }
+  .building:hover {
+    filter: brightness(1.06);
+    transform: scaleY(1.05);
+    transform-origin: bottom;
+    z-index: 20;
+  }
+  .building.south-side:hover {
+    transform-origin: top;
+  }
+
+  .bld-num {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1.05em;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .bld-name {
+    font-size: 0.82em;
+    color: var(--ink-mid);
+    line-height: 1.2;
+    margin-top: 2px;
+    padding: 0 2px;
+    display: none;
+  }
+  .building.known .bld-name {
+    display: block;
+  }
+  .bld-icon {
+    font-size: 1.5em;
+    margin-bottom: 2px;
+    display: none;
+  }
+  .building.known .bld-icon {
+    display: block;
+  }
+
+  /* Tooltip */
+  .bld-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--parchment);
+    padding: 7px 11px;
+    border-radius: 3px;
+    font-size: 0.92em;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    font-style: normal;
+    line-height: 1.5;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .bld-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--ink);
+  }
+  .building.south-side .bld-tooltip {
+    bottom: auto;
+    top: calc(100% + 8px);
+  }
+  .building.south-side .bld-tooltip::after {
+    top: auto;
+    bottom: 100%;
+    border-top-color: transparent;
+    border-bottom-color: var(--ink);
+  }
+  .building:hover .bld-tooltip { display: block; }
+
+  /* ─── ROAD ────────────────────────────────────────── */
+  .road {
+    height: 48px;
+    background: var(--road-color);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 3px solid #4a4030;
+    border-bottom: 3px solid #4a4030;
+    background-image:
+      repeating-linear-gradient(90deg,
+        transparent 0, transparent 18px,
+        rgba(255,255,200,0.12) 18px, rgba(255,255,200,0.12) 20px
+      );
+  }
+  .road-stripe {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 3px;
+    transform: translateY(-50%);
+    background: repeating-linear-gradient(90deg,
+      var(--road-stripe) 0, var(--road-stripe) 22px,
+      transparent 22px, transparent 44px
+    );
+    opacity: 0.4;
+  }
+  .road-label {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: rgba(255, 248, 220, 0.9);
+    font-size: 1em;
+    letter-spacing: 4px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    z-index: 1;
+  }
+
+  /* Side labels */
+  .side-label {
+    font-size: 0.65em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--ink-light);
+    text-align: right;
+    padding-right: 8px;
+    margin-bottom: 3px;
+    font-style: italic;
+  }
+  .side-label.south { text-align: right; margin-top: 3px; margin-bottom: 0; }
+
+  /* ─── INFO TABLE ──────────────────────────────────── */
+  .info-panel {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--parchment);
+    border: 1px solid var(--ink-light);
+    border-radius: 4px;
+    padding: 16px 20px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+  }
+  .info-panel h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1em;
+    font-style: italic;
+    color: var(--ink-mid);
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--ink-light);
+    padding-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8em;
+  }
+  .info-table th {
+    background: var(--parchment-dk);
+    text-align: left;
+    padding: 6px 10px;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    border-bottom: 2px solid var(--ink-light);
+    color: var(--ink-mid);
+    letter-spacing: 0.5px;
+  }
+  .info-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(160,130,80,0.2);
+    vertical-align: top;
+    line-height: 1.45;
+    color: var(--ink);
+  }
+  .info-table tr:last-child td { border-bottom: none; }
+  .cat-dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    margin-right: 5px;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .note-text {
+    font-style: italic;
+    font-size: 0.88em;
+    color: var(--ink-light);
+  }
+
+  .footer-note {
+    text-align: center;
+    margin-top: 20px;
+    font-style: italic;
+    font-size: 0.72em;
+    color: var(--ink-light);
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-ornament">✦ ✦ ✦</div>
+  <h1>A Virtual Map of <span>Białostocka Street</span></h1>
+  <p class="subtitle">Grodno (Hrodna) · Historical Directory Reconstruction · 1930–1939</p>
+  <hr class="divider">
+  <span class="template-badge">[1] ←— Białostocka —→ [124]</span>
+</div>
+
+<!-- LEGEND -->
+<div class="legend-panel">
+  <div class="legend-title">Legend — Known Premises</div>
+  <div class="legend-items" id="legendItems"></div>
+</div>
+
+<!-- MAP FRAME -->
+<div class="map-frame">
+  <div class="compass-row">
+    <span>← Towards town centre (odd side)</span>
+    <span>North ↑</span>
+    <span>(even side) Towards outskirts →</span>
+  </div>
+
+  <div class="street-scroll">
+    <div class="street-diagram">
+      <!-- Odd (north) side label -->
+      <div class="side-label">Odd numbers — North side</div>
+
+      <!-- North (odd) buildings -->
+      <div class="building-row" id="northRow"></div>
+
+      <!-- Road -->
+      <div class="road" id="road">
+        <div class="road-stripe"></div>
+        <div class="road-label">Białostocka</div>
+      </div>
+
+      <!-- South (even) buildings -->
+      <div class="building-row south-side" id="southRow"></div>
+
+      <div class="side-label south">Even numbers — South side</div>
+    </div>
+  </div>
+</div>
+
+<!-- INFO TABLE -->
+<div class="info-panel">
+  <h2>Known Addresses — Białostocka Street, Grodno (1930s Directories)</h2>
+  <table class="info-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Resident / Business</th>
+        <th>Description</th>
+        <th>Period</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<p class="footer-note">
+  Reconstructed from Polish commercial directories (Ksiąg Adresowych) · Addresses are approximate · Unknown buildings shown with dashed outline
+</p>
+
+<script>
+// ── DATA ────────────────────────────────────────────
+const CATEGORIES = {
+  home:       { label: "Family Home (Grandmother)",  color: "#c0395a", icon: "🏠" },
+  trade:      { label: "Merchant / Trade",           color: "#6a9e5a", icon: "🪵" },
+  pharmacy:   { label: "Pharmacy / Medical",         color: "#4a7aaa", icon: "⚗️" },
+  industrial: { label: "Industrial (Glassworks)",    color: "#c45820", icon: "🏭" },
+  textile:    { label: "Textile / Rags Trade",       color: "#8a5aaa", icon: "🧵" },
+  food:       { label: "Food Production",            color: "#c48020", icon: "🫙" },
+  factory:    { label: "Factory / Manufacturing",    color: "#7a5530", icon: "⚒️" },
+  unknown:    { label: "Unknown / Unrecorded",       color: "#f0e6c8", icon: ""   },
+};
+
+const BUILDINGS = {
+  10:  { name: "Grandmother's Home",     short: "Our Family",  cat: "home",       period: "1930s",     note: "Last known address in Grodno" },
+  1:   { name: "Sz. Gerszuny",           short: "Gerszuny",    cat: "trade",      period: "1930",      note: "Timber merchant" },
+  46:  { name: "Abraham Trop-Kryński",   short: "Trop-Kryński",cat: "pharmacy",   period: "1939",      note: "Pharmacist; spelling varies" },
+  54:  { name: "Abraham Kriński-Tropp",  short: "Kriński-Tropp",cat:"pharmacy",   period: "1939",      note: "Possibly same person as No. 46" },
+  78:  { name: "Huta Szklana",           short: "Huta Szklana",cat: "industrial", period: "1931–1938", note: "Glassworks; also office of Dr. Przyborowski" },
+  82:  { name: "Huta Szklana",           short: "Huta Szklana",cat: "industrial", period: "1930–1932", note: "Leon Podoski & partners" },
+  86:  { name: "Lubecki & Handelsman",   short: "Lubecki",     cat: "textile",    period: "1935–1938", note: "Rags & textile waste" },
+  90:  { name: "Lubecki & Handelsman",   short: "Lubecki",     cat: "textile",    period: "1932",      note: "Export/Import; sorting facility" },
+  94:  { name: "Borys Małachowski",      short: "Małachowski", cat: "food",       period: "1935–1938", note: "Potato syrup production" },
+  124: { name: "Budomat (N. Klempner)",  short: "Budomat",     cat: "factory",    period: "1930",      note: "Roofing felt, asphalt, tar" },
+};
+
+// ── BUILD LEGEND ─────────────────────────────────────
+const legendEl = document.getElementById('legendItems');
+Object.entries(CATEGORIES).forEach(([key, cat]) => {
+  const div = document.createElement('div');
+  div.className = 'legend-item';
+  const borderStyle = key === 'unknown' ? '2px dashed #c0b090' : `2px solid ${cat.color}`;
+  const bg = key === 'unknown' ? '#f8f2e0' : cat.color + '55';
+  div.innerHTML = `
+    <div class="legend-swatch" style="background:${bg};border:${borderStyle}"></div>
+    <span>${cat.label}</span>
+  `;
+  legendEl.appendChild(div);
+});
+
+// ── BUILD STREET ─────────────────────────────────────
+function darken(hex) {
+  // Return the pure hex color for border
+  return hex;
+}
+
+function makeBuilding(num, isSouth) {
+  const data  = BUILDINGS[num];
+  const isKnown = !!data;
+  const cat   = isKnown ? CATEGORIES[data.cat] : CATEGORIES.unknown;
+
+  const div = document.createElement('div');
+  div.className = 'building' + (isSouth ? ' south-side' : '') + (isKnown ? ' known' : ' unknown');
+
+  if (isKnown) {
+    const bg = cat.color + '40';
+    div.style.background = bg;
+    div.style.borderColor = cat.color;
+    div.style.borderStyle = 'solid';
+  }
+
+  // Icon (known only, shown inside)
+  if (isKnown) {
+    const icon = document.createElement('div');
+    icon.className = 'bld-icon';
+    icon.textContent = cat.icon;
+    div.appendChild(icon);
+  }
+
+  // Number
+  const numEl = document.createElement('div');
+  numEl.className = 'bld-num';
+  numEl.textContent = num;
+  div.appendChild(numEl);
+
+  // Short name (known only)
+  if (isKnown) {
+    const nameEl = document.createElement('div');
+    nameEl.className = 'bld-name';
+    nameEl.textContent = data.short;
+    div.appendChild(nameEl);
+  }
+
+  // Tooltip
+  const tip = document.createElement('div');
+  tip.className = 'bld-tooltip';
+  if (isKnown) {
+    tip.innerHTML = `<b>#${num} — ${data.name}</b><br>${cat.icon} ${cat.label}<br><i>${data.period}</i><br>${data.note}`;
+  } else {
+    tip.innerHTML = `<b>#${num}</b><br><i>No records found</i>`;
+  }
+  div.appendChild(tip);
+
+  return div;
+}
+
+// Odd numbers: 1–125 → north side
+const northRow = document.getElementById('northRow');
+for (let n = 1; n <= 125; n += 2) {
+  northRow.appendChild(makeBuilding(n, false));
+}
+
+// Even numbers: 2–124 → south side
+const southRow = document.getElementById('southRow');
+for (let n = 2; n <= 124; n += 2) {
+  southRow.appendChild(makeBuilding(n, true));
+}
+
+// Match road width to building rows
+const diagEl = document.querySelector('.street-diagram');
+const roadEl = document.getElementById('road');
+// Road width auto-matches because it's inside the same flex column
+
+// ── BUILD TABLE ───────────────────────────────────────
+const tbody = document.getElementById('tableBody');
+Object.entries(BUILDINGS).forEach(([num, b]) => {
+  const cat = CATEGORIES[b.cat];
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><b>${num}</b></td>
+    <td>${b.name}</td>
+    <td>
+      <span class="cat-dot" style="background:${cat.color}"></span>${cat.label}
+    </td>
+    <td>${b.period}</td>
+    <td class="note-text">${b.note}</td>
+  `;
+  tbody.appendChild(tr);
+});
+</script>
+</body>
+</html>
